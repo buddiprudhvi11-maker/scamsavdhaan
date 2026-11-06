@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScamSavdhaan - Everyday Scam & Fake Message Scanner</title>
+  <!-- Tailwind CSS from allowlisted gstatic source -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* Pulse glow for high risk */
+    @keyframes redPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6); }
+      50% { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
+    }
+    .pulse-danger {
+      animation: redPulse 2s infinite;
+    }
+    /* Simulated OCR scan line animation */
+    @keyframes scanLine {
+      0% { top: 0%; opacity: 0.9; }
+      50% { top: 90%; opacity: 0.9; }
+      100% { top: 0%; opacity: 0.9; }
+    }
+    .ocr-scanner-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #3b82f6, #60a5fa, transparent);
+      box-shadow: 0 0 10px #3b82f6;
+      animation: scanLine 1.5s ease-in-out infinite;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.05);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0,0,0,0.2);
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col selection:bg-red-200">
+
+  <!-- TOP EMERGENCY HELPLINE BANNER -->
+  <aside id="emergency-banner-bar" class="bg-red-700 text-white px-4 py-2.5 shadow-md border-b-2 border-red-800" aria-label="National Cyber Helpline">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-sm">
+      <div class="flex items-center gap-2.5 font-medium">
+        <svg class="w-5 h-5 flex-shrink-0 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <span id="emergency-banner-text" class="text-sm md:text-base font-semibold">
+          Received a fraud call or lost money? Call National Cyber Helpline 1930 or report on cybercrime.gov.in.
+        </span>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <a id="emergency-dial-btn" href="tel:1930" class="inline-flex items-center gap-1.5 bg-white text-red-700 hover:bg-red-50 font-bold px-3 py-1.5 rounded-lg text-sm shadow transition-colors active:scale-95">
+          <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+          </svg>
+          <span id="emergency-dial-label">Dial 1930</span>
+        </a>
+        <a id="emergency-portal-btn" href="https://cybercrime.gov.in" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-white bg-red-800 hover:bg-red-900 border border-red-500 font-medium px-3 py-1.5 rounded-lg text-xs md:text-sm transition-colors">
+          <span>cybercrime.gov.in</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN APP HEADER & LANGUAGE TOGGLE -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <!-- Brand Title -->
+      <div class="flex items-start gap-3">
+        <div class="w-12 h-12 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-lg shadow-red-200 flex-shrink-0">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 id="app-brand-title" class="text-2xl font-black text-slate-900 tracking-tight">ScamSavdhaan</h1>
+            <span id="app-brand-badge" class="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-red-200 uppercase tracking-wide">
+              Citizen Suraksha Prototype
+            </span>
+          </div>
+          <p id="app-brand-subtitle" class="text-sm text-slate-600 mt-0.5 font-medium">
+            Instant verification for suspicious SMS, WhatsApp offers, and lottery messages.
+          </p>
+        </div>
+      </div>
+
+      <!-- Language Selector Pill Toggle -->
+      <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-300 self-start md:self-auto">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 px-2 flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+          </svg>
+          Lang:
+        </span>
+        <button onclick="setLanguage('en')" id="lang-btn-en" class="px-2.5 py-1 text-xs sm:text-sm font-bold rounded-lg transition-all bg-white text-red-700 shadow-sm border border-slate-200">
+          English
+        </button>
+        <button onclick="setLanguage('hi')" id="lang-btn-hi" class="px-2.5 py-1 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-700 hover:text-slate-900">
+          हिंदी
+        </button>
+        <button onclick="setLanguage('te')" id="lang-btn-te" class="px-2.5 py-1 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-700 hover:text-slate-900">
+          తెలుగు
+        </button>
+        <button onclick="setLanguage('ta')" id="lang-btn-ta" class="px-2.5 py-1 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-700 hover:text-slate-900">
+          தமிழ்
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 py-6 sm:py-8 flex-1 w-full space-y-8">
+
+    <!-- HERO WORKSPACE SECTION -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+      <!-- LEFT COLUMN: INPUT CARD & PRESETS (7 COLS) -->
+      <div class="lg:col-span-7 space-y-6">
+
+        <!-- WORKSPACE CARD WITH TABS -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+
+          <!-- Tab Navigation -->
+          <div class="flex border-b border-slate-200 bg-slate-50/80 p-1.5 gap-1.5" role="tablist">
+            <button onclick="switchTab('text')" id="tab-btn-text" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-bold transition-all bg-white text-red-700 shadow-sm border border-slate-200">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+              </svg>
+              <span id="tab-label-text">Paste Text / SMS</span>
+            </button>
+            <button onclick="switchTab('ocr')" id="tab-btn-ocr" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-slate-900">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span id="tab-label-ocr">Screenshot (Simulated OCR)</span>
+            </button>
+            <button onclick="switchTab('sender')" id="tab-btn-sender" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-slate-900">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+              <span id="tab-label-sender">Check Sender / Link</span>
+            </button>
+          </div>
+
+          <!-- TAB 1 CONTENT: TEXT / SMS -->
+          <div id="tab-panel-text" class="p-5 space-y-4">
+            <div class="relative">
+              <label for="raw-message-input" class="sr-only">Suspicious message text</label>
+              <textarea
+                id="raw-message-input"
+                rows="6"
+                placeholder="Paste the suspicious message, SMS, WhatsApp offer, or unknown link text here..."
+                class="w-full p-4 text-base sm:text-lg text-slate-900 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-red-500 focus:bg-white focus:outline-none transition-all placeholder:text-slate-400 font-mono leading-relaxed"
+                oninput="updateCharCount()"
+              ></textarea>
+              <div class="absolute bottom-3 right-3 text-xs font-semibold text-slate-400 bg-white/80 px-2 py-0.5 rounded border border-slate-200">
+                <span id="char-count">0</span> chars
+              </div>
+            </div>
+
+            <!-- Action buttons below textarea -->
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  onclick="pasteFromClipboard()"
+                  class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-semibold px-3 py-2 rounded-lg transition-colors border border-slate-300 active:scale-95"
+                >
+                  <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <span id="paste-btn-text">Paste from Clipboard</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="clearInputs()"
+                  class="text-xs sm:text-sm text-slate-500 hover:text-red-600 font-semibold px-2 py-2 transition-colors"
+                >
+                  <span id="clear-btn-text">Clear</span>
+                </button>
+              </div>
+              <span class="text-xs text-slate-500 italic">Senior-friendly high contrast mode</span>
+            </div>
+          </div>
+
+          <!-- TAB 2 CONTENT: SCREENSHOT UPLOAD (SIMULATED OCR) -->
+          <div id="tab-panel-ocr" class="p-5 space-y-4 hidden">
+            <div id="ocr-dropzone" class="border-2 border-dashed border-slate-300 hover:border-red-400 rounded-2xl p-6 text-center bg-slate-50/50 hover:bg-red-50/30 transition-all relative overflow-hidden">
+              <div id="ocr-scanner-active" class="hidden">
+                <div class="ocr-scanner-line"></div>
+              </div>
+              <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <p class="text-sm font-semibold text-slate-800">Drag & drop suspicious screenshot or click a preset sample below</p>
+              <p class="text-xs text-slate-500 mt-1">Our simulated OCR engine extracts text, detects embedded links, and analyzes risks.</p>
+            </div>
+
+            <!-- OCR Demo Sample Buttons -->
+            <div class="space-y-2">
+              <p class="text-xs font-bold text-slate-700 uppercase tracking-wider">Click Simulated Screenshot Sample:</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onclick="simulateOcrSample('wedding')"
+                  class="flex items-start gap-2.5 p-3 rounded-xl border border-red-200 bg-red-50/40 hover:bg-red-50 text-left transition-all group"
+                >
+                  <div class="w-8 h-8 rounded-lg bg-red-100 text-red-700 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="text-xs font-bold text-slate-900">Sample 1: WhatsApp Wedding APK Scam</div>
+                    <div class="text-[11px] text-slate-600 mt-0.5">Royal_Wedding_Card.apk + wa.me link</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onclick="simulateOcrSample('sbi')"
+                  class="flex items-start gap-2.5 p-3 rounded-xl border border-amber-200 bg-amber-50/40 hover:bg-amber-50 text-left transition-all group"
+                >
+                  <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="text-xs font-bold text-slate-900">Sample 2: Fake SBI PAN Block SMS</div>
+                    <div class="text-[11px] text-slate-600 mt-0.5">sbi-online-kyc.com/login phishing</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3 CONTENT: SENDER & LINK CHECK -->
+          <div id="tab-panel-sender" class="p-5 space-y-4 hidden">
+            <div>
+              <label id="sender-label" for="sender-input" class="block text-sm font-bold text-slate-800 mb-1">
+                Sender ID / Phone Number (Optional)
+              </label>
+              <input
+                type="text"
+                id="sender-input"
+                placeholder="e.g. +91-8923456712 or VM-HDFCBK"
+                class="w-full px-4 py-2.5 text-base text-slate-900 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-red-500 focus:bg-white focus:outline-none transition-all"
+              />
+              <p id="sender-help-text" class="text-xs text-slate-500 mt-1">
+                Personal 10-digit mobile (+91-9...) vs official TRAI DLT header (e.g., VM-HDFCBK, AX-SBIINB).
+              </p>
+            </div>
+            <div>
+              <label id="url-label" for="url-input" class="block text-sm font-bold text-slate-800 mb-1">
+                Suspicious URL or Unknown WhatsApp Link (Optional)
+              </label>
+              <input
+                type="text"
+                id="url-input"
+                placeholder="e.g. https://wa.me/918923456712, chat.whatsapp.com/..., bit.ly/sbi-kyc"
+                class="w-full px-4 py-2.5 text-base text-slate-900 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-red-500 focus:bg-white focus:outline-none transition-all"
+              />
+              <p id="url-help-text" class="text-xs text-slate-500 mt-1">
+                Shortened bit.ly, .xyz, unverified wa.me chats, or disguised .apk downloads.
+              </p>
+            </div>
+          </div>
+
+          <!-- PRIMARY SCAN CTA BAR -->
+          <div class="p-5 pt-0">
+            <button
+              id="primary-scan-btn"
+              type="button"
+              onclick="executeScan()"
+              class="w-full bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-black text-lg py-4 px-6 rounded-xl shadow-lg shadow-red-200 transition-all flex items-center justify-center gap-3 transform active:scale-[0.99] cursor-pointer"
+            >
+              <svg id="scan-icon-shield" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              <!-- Spinner for loading state -->
+              <svg id="scan-icon-spinner" class="w-6 h-6 animate-spin hidden" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span id="scan-btn-label">Scan Message Now</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- ONE-CLICK DEMO PRESETS -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 id="presets-title" class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+              <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              One-Click Demo Presets (Test Instantly)
+            </h3>
+            <span class="text-xs text-slate-400 font-semibold">Click to load</span>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <button
+              onclick="loadPreset('electricity-cutoff')"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-700 border border-slate-200 hover:border-red-300 transition-all active:scale-95 flex items-center gap-1.5"
+            >
+              <span>⚡</span>
+              <span>Electricity Cut-off Alert</span>
+            </button>
+            <button
+              onclick="loadPreset('telegram-whatsapp-job')"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 hover:bg-amber-50 text-slate-700 hover:text-amber-800 border border-slate-200 hover:border-amber-300 transition-all active:scale-95 flex items-center gap-1.5"
+            >
+              <span>💼</span>
+              <span>Telegram/WhatsApp Job</span>
+            </button>
+            <button
+              onclick="loadPreset('india-post-courier')"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 hover:bg-purple-50 text-slate-700 hover:text-purple-800 border border-slate-200 hover:border-purple-300 transition-all active:scale-95 flex items-center gap-1.5"
+            >
+              <span>📦</span>
+              <span>India Post / Address Update</span>
+            </button>
+            <button
+              onclick="loadPreset('whatsapp-unknown-apk')"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-800 border border-slate-200 hover:border-rose-300 transition-all active:scale-95 flex items-center gap-1.5"
+            >
+              <span>📱</span>
+              <span>WhatsApp APK Malware</span>
+            </button>
+            <button
+              onclick="loadPreset('safe-bank-otp')"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-300 transition-all active:scale-95 flex items-center gap-1.5"
+            >
+              <span>🛡️</span>
+              <span>Bank OTP Alert (Safe Sample)</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: RESULTS & VERDICT DASHBOARD (5 COLS) -->
+      <div class="lg:col-span-5 space-y-6">
+
+        <!-- SKELETON LOADER (1.5s simulated scan state) -->
+        <div id="skeleton-loader" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-slate-200 animate-pulse"></div>
+            <div class="space-y-2 flex-1">
+              <div class="h-4 bg-slate-200 rounded animate-pulse w-3/4"></div>
+              <div class="h-3 bg-slate-200 rounded animate-pulse w-1/2"></div>
+            </div>
+          </div>
+          <div class="h-32 bg-slate-100 rounded-xl animate-pulse flex items-center justify-center p-4">
+            <div class="text-center space-y-2">
+              <div class="inline-block w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+              <p id="scanning-progress-label" class="text-xs font-bold text-slate-600">
+                Inspecting links, sender headers & scam patterns...
+              </p>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div class="h-3 bg-slate-200 rounded animate-pulse"></div>
+            <div class="h-3 bg-slate-200 rounded animate-pulse w-5/6"></div>
+          </div>
+        </div>
+
+        <!-- ANALYSIS RESULTS CONTAINER -->
+        <div id="results-container" class="space-y-6">
+
+          <!-- 1. VERDICT BANNER -->
+          <div id="verdict-card" class="rounded-2xl p-5 shadow-sm border transition-all bg-red-50 border-red-200">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-start gap-3">
+                <div id="verdict-icon-container" class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm bg-red-600 text-white pulse-danger">
+                  <svg id="verdict-icon-svg" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h2 id="verdict-title" class="text-xl font-black text-red-950">High Risk / Scam Alert</h2>
+                  </div>
+                  <p id="verdict-category" class="text-xs font-bold uppercase tracking-wider text-red-700 mt-0.5">
+                    Utility Disconnection Scam
+                  </p>
+                </div>
+              </div>
+
+              <!-- Audio Read Aloud Button for Senior Citizens -->
+              <button
+                type="button"
+                id="audio-read-btn"
+                onclick="toggleSpeechVerdict()"
+                class="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all active:scale-95"
+                title="Listen in plain language"
+              >
+                <svg id="audio-icon-speaker" class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                </svg>
+                <span id="audio-btn-label">Listen</span>
+              </button>
+            </div>
+
+            <!-- Threat Score Gauge & Breakdown -->
+            <div class="mt-5 pt-4 border-t border-red-200/60 grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+              <!-- Radial Meter -->
+              <div class="sm:col-span-1 flex flex-col items-center justify-center p-2 bg-white/80 rounded-xl border border-red-100">
+                <div class="relative w-24 h-24 flex items-center justify-center">
+                  <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                    <path class="text-slate-200" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path id="gauge-circle-progress" class="text-red-600 transition-all duration-1000" stroke-dasharray="88, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  </svg>
+                  <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span id="threat-score-number" class="text-2xl font-black text-red-700">88</span>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">Threat Score</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Metric Breakdown Tags -->
+              <div class="sm:col-span-2 space-y-2 text-xs">
+                <div class="bg-white/90 p-2 rounded-lg border border-red-100">
+                  <div class="font-bold text-slate-700">Urgency Pressure:</div>
+                  <div id="metric-urgency-val" class="text-red-700 font-semibold mt-0.5">85/100 (Artificial panic detected)</div>
+                </div>
+                <div class="bg-white/90 p-2 rounded-lg border border-red-100">
+                  <div class="font-bold text-slate-700">Link & Malware Safety:</div>
+                  <div id="metric-link-val" class="text-red-700 font-semibold mt-0.5">Suspicious domain / APK found</div>
+                </div>
+                <div class="bg-white/90 p-2 rounded-lg border border-red-100">
+                  <div class="font-bold text-slate-700">Sender Credibility:</div>
+                  <div id="metric-sender-val" class="text-amber-800 font-semibold mt-0.5">Personal 10-digit mobile number</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 2. AI PLAIN-LANGUAGE VERDICT -->
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-2">
+            <div class="flex items-center gap-2 text-indigo-700">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+              <h3 id="ai-verdict-title" class="text-sm font-bold uppercase tracking-wider text-slate-900">
+                AI Plain-Language Verdict
+              </h3>
+            </div>
+            <p id="ai-verdict-text" class="text-sm sm:text-base text-slate-700 leading-relaxed font-medium bg-slate-50 p-4 rounded-xl border border-slate-200">
+              This is a classic utility disconnection scam. Genuine electricity boards never send disconnection notices from personal mobile numbers asking you to call an unofficial WhatsApp number.
+            </p>
+          </div>
+
+          <!-- 3. SCAM ANATOMY & RED FLAGS BREAKDOWN (VISUAL DISSECTION) -->
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 id="scam-anatomy-title" class="text-sm font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                </svg>
+                Scam Anatomy (Visual Dissection)
+              </h3>
+            </div>
+            <p id="scam-anatomy-help" class="text-xs text-slate-500">
+              Click any highlighted phrase to learn why scam syndicates use this psychological trigger:
+            </p>
+
+            <!-- Dissection Text Area -->
+            <div id="dissection-box" class="p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm sm:text-base leading-loose font-mono">
+              <!-- Dynamically rendered highlighted spans -->
+            </div>
+
+            <!-- Red Flag Count Badges -->
+            <div id="red-flags-summary" class="flex flex-wrap gap-2 pt-2">
+              <span id="badge-urgency-count" class="inline-flex items-center gap-1 bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded-lg border border-red-200">
+                🚨 Urgency Triggers: 1
+              </span>
+              <span id="badge-link-count" class="inline-flex items-center gap-1 bg-amber-100 text-amber-900 text-xs font-bold px-2.5 py-1 rounded-lg border border-amber-200">
+                🔗 Suspicious Link/APK: 1
+              </span>
+              <span id="badge-financial-count" class="inline-flex items-center gap-1 bg-yellow-100 text-yellow-900 text-xs font-bold px-2.5 py-1 rounded-lg border border-yellow-200">
+                💰 Financial Lure: 0
+              </span>
+            </div>
+
+            <!-- Active Dissection Explanation Box -->
+            <div id="active-explanation-card" class="hidden bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 text-xs text-indigo-950 space-y-1">
+              <div class="font-bold flex items-center gap-1.5 text-indigo-900" id="expl-label">Trigger Name</div>
+              <div id="expl-text" class="leading-relaxed">Explanation text will appear here.</div>
+            </div>
+          </div>
+
+          <!-- 4. ACTIONABLE CHECKLIST & ONE-CLICK CHAKSHU REPORT -->
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 id="checklist-title" class="text-sm font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                What should you do now?
+              </h3>
+              <span id="checklist-progress" class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                0/4 Completed
+              </span>
+            </div>
+
+            <div class="space-y-2.5 text-xs sm:text-sm" id="checklist-items-container">
+              <!-- Dynamically populated checklist items -->
+            </div>
+
+            <!-- One-Click Report Button -->
+            <div class="pt-2">
+              <button
+                type="button"
+                onclick="openChakshuModal()"
+                class="w-full bg-slate-900 hover:bg-black text-white font-bold py-3 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-md active:scale-95"
+              >
+                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span id="report-btn-label">One-Click Chakshu / 1930 Report</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- LIVE COMMON SCAM TICKER (COMMUNITY DEFENSE) -->
+    <section class="mt-12 bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-100 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-600 animate-ping"></span>
+            <h2 id="ticker-heading" class="text-lg font-black text-slate-900 tracking-tight">
+              Live Trending Scam Ticker (India Community Defense)
+            </h2>
+          </div>
+          <p id="ticker-subheading" class="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Real-time fraud patterns reported across National Cybercrime Reporting Portal & Chakshu.
+          </p>
+        </div>
+        <div class="text-xs font-semibold text-slate-400">Updated Hourly • 2026-11-06</div>
+      </div>
+
+      <!-- Scam Cards Grid -->
+      <div id="trending-scams-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Dynamically rendered cards -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- CHAKSHU REPORT MODAL (DIALOG) -->
+  <div id="chakshu-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 space-y-4 border border-slate-200 max-h-[90vh] flex flex-col">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-black text-slate-900">Chakshu / Cybercrime Incident Report</h3>
+            <p class="text-xs text-slate-500">Department of Telecommunications (DoT) Sanchar Saathi</p>
+          </div>
+        </div>
+        <button onclick="closeChakshuModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-600">
+        Copy this pre-formatted complaint text and paste it directly into the Government Chakshu Portal or submit to National Cyber Helpline 1930.
+      </p>
+
+      <textarea
+        id="chakshu-complaint-textarea"
+        readonly
+        rows="9"
+        class="w-full p-3.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono text-slate-800 leading-relaxed overflow-y-auto"
+      ></textarea>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+        <a
+          href="https://sancharsaathi.gov.in/sfc/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 underline"
+        >
+          <span>Open DoT Chakshu Portal</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            onclick="copyComplaintToClipboard()"
+            id="copy-complaint-btn"
+            class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow transition-all flex items-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+            </svg>
+            <span id="copy-complaint-label">Copy Complaint Text</span>
+          </button>
+          <button
+            type="button"
+            onclick="closeChakshuModal()"
+            class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl transition-all"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 space-y-2">
+      <div class="flex flex-wrap items-center justify-center gap-4 text-slate-600 font-medium">
+        <span>Citizen Cyber Defense Prototype</span>
+        <span>•</span>
+        <span>National Cyber Crime Helpline: <strong>1930</strong></span>
+        <span>•</span>
+        <span>SMS Spam Reporting: <strong>1909</strong></span>
+        <span>•</span>
+        <span>TRAI & DoT Chakshu Integrated</span>
+      </div>
+      <p class="text-[11px] text-slate-400">
+        Disclaimer: This scanner uses client-side pattern heuristics & regex verification to detect known scam syndicates in India. Never share OTPs, passwords, or UPI PINs with anyone.
+      </p>
+    </div>
+  </footer>
+
+  <!-- SCRIPT LOGIC (Matches lib/scanner.ts 100%) -->
+  <script>
+    // State
+    let currentLanguage = "en";
+    let activeTab = "text";
+    let isScanning = false;
+    let isSpeaking = false;
+    let lastScanResult = null;
+    let checkedItemsState = [false, false, false, false];
+
+    // Multilingual Translations Dictionary
+    const UI_TRANSLATIONS = {
+      en: {
+        langName: "English",
+        title: "ScamSavdhaan",
+        badge: "Citizen Suraksha Prototype",
+        subtitle: "Instant verification for suspicious SMS, WhatsApp offers, and lottery messages.",
+        emergencyBanner: "Received a fraud call or lost money? Call National Cyber Helpline 1930 or report on cybercrime.gov.in.",
+        dialBtn: "Dial 1930",
+        reportPortalBtn: "cybercrime.gov.in",
+        tabText: "Paste Text / SMS",
+        tabOcr: "Screenshot Upload (Simulated OCR)",
+        tabSender: "Check Sender / Link",
+        placeholderText: "Paste the suspicious message, SMS, WhatsApp offer, or unknown link text here...",
+        pasteBtn: "Paste from Clipboard",
+        clearBtn: "Clear",
+        senderLabel: "Sender ID / Phone Number (Optional)",
+        senderHelp: "Personal 10-digit mobile (+91-9...) vs official TRAI DLT header (e.g., VM-HDFCBK, AX-SBIINB).",
+        urlLabel: "Suspicious URL or Unknown WhatsApp Link (Optional)",
+        urlHelp: "Shortened bit.ly, .xyz, unverified wa.me chats, or disguised .apk downloads.",
+        scanBtn: "Scan Message Now",
+        scanningText: "Inspecting links, sender headers & scam patterns...",
+        presetsTitle: "One-Click Demo Presets (Test Instantly)",
+        verdictHigh: "High Risk / Scam Alert",
+        verdictSuspicious: "Suspicious / Verify Further",
+        verdictSafe: "Likely Safe / Genuine Notice",
+        threatGaugeTitle: "Threat Risk Meter",
+        scamAnatomyTitle: "Scam Anatomy & Red Flags Breakdown (Visual Dissection)",
+        scamAnatomyHelp: "Click any highlighted phrase to learn why scam syndicates use this psychological trigger:",
+        aiVerdictTitle: "AI Plain-Language Verdict",
+        checklistTitle: "What should you do now? (Actionable Safety Steps)",
+        reportBtn: "One-Click Chakshu / 1930 Report",
+        trendingTitle: "Live Trending Scam Ticker (India Community Defense)",
+        trendingSubtitle: "Real-time fraud patterns reported across National Cybercrime Reporting Portal & Chakshu.",
+        readAloudBtn: "Listen in Plain Language",
+        readingAloud: "Reading Verdict Aloud...",
+        stopAudio: "Stop Audio",
+        checkItems: [
+          "Do not click any unknown WhatsApp links or download the .apk file.",
+          "Block the sender immediately on WhatsApp or your phone dialer.",
+          "Forward the SMS to 1909 (TRAI DND reporting) or report to the Chakshu Portal.",
+          "Never share any 6-digit OTP, ATM PIN, or UPI PIN with anyone."
+        ]
+      },
+      hi: {
+        langName: "हिंदी",
+        title: "स्कैम सावधान (ScamSavdhaan)",
+        badge: "नागरिक सुरक्षा प्रोटोटाइप",
+        subtitle: "संदिग्ध SMS, WhatsApp ऑफ़र, फर्जी बिजली बिल और लॉटरी संदेशों की तुरंत जांच करें।",
+        emergencyBanner: "धोखाधड़ी कॉल आया या पैसे कट गए? तुरंत राष्ट्रीय साइबर हेल्पलाइन 1930 पर कॉल करें या cybercrime.gov.in पर रिपोर्ट करें।",
+        dialBtn: "1930 पर कॉल करें",
+        reportPortalBtn: "cybercrime.gov.in",
+        tabText: "मैसेज / SMS पेस्ट करें",
+        tabOcr: "स्क्रीनशॉट (OCR सिमुलेशन)",
+        tabSender: "नंबर / लिंक जांचें",
+        placeholderText: "संदिग्ध SMS, WhatsApp संदेश या लॉटरी ऑफ़र यहाँ पेस्ट करें...",
+        pasteBtn: "क्लिपबोर्ड से पेस्ट करें",
+        clearBtn: "साफ़ करें",
+        senderLabel: "भेजने वाले का नंबर या ID (वैकल्पिक)",
+        senderHelp: "व्यक्तिगत 10-अंकीय मोबाइल (+91-9...) बनाम अधिकृत TRAI DLT हेडर (उदा. VM-HDFCBK)।",
+        urlLabel: "संदिग्ध लिंक या WhatsApp लिंक (वैकल्पिक)",
+        urlHelp: "छोटा bit.ly लिंक, .xyz डोमेन, अज्ञात wa.me चैट, या .apk फ़ाइल।",
+        scanBtn: "संदेश की जांच करें",
+        scanningText: "लिंक, भेजने वाले का नंबर और स्कैम पैटर्न जांचा जा रहा है...",
+        presetsTitle: "एक-क्लिक डेमो उदाहरण (तुरंत परखें)",
+        verdictHigh: "गंभीर खतरा / धोखाधड़ी चेतावनी",
+        verdictSuspicious: "संदिग्ध संदेश / सतर्क रहें",
+        verdictSafe: "सुरक्षित / असली सूचना",
+        threatGaugeTitle: "खतरा मापक (Threat Meter)",
+        scamAnatomyTitle: "संदेश का विश्लेषण और लाल झंडे (Visual Dissection)",
+        scamAnatomyHelp: "किसी भी हाइलाइट किए गए हिस्से पर क्लिक करके जानें कि जालसाज यह तरीका क्यों अपनाते हैं:",
+        aiVerdictTitle: "सरल भाषा में निर्णय",
+        checklistTitle: "अब आपको क्या करना चाहिए? (सुरक्षा कदम)",
+        reportBtn: "चक्षु (Chakshu) पोर्टल रिपोर्ट तैयार करें",
+        trendingTitle: "भारत में सक्रिय प्रमुख ऑनलाइन फ्रॉड (Live Ticker)",
+        trendingSubtitle: "राष्ट्रीय साइबर अपराध रिपोर्टिंग पोर्टल व चक्षु पर दर्ज ताज़ा धोखाधड़ी के तरीके।",
+        readAloudBtn: "सरल भाषा में सुनें",
+        readingAloud: "आवाज़ में पढ़ा जा रहा है...",
+        stopAudio: "ऑडियो रोकें",
+        checkItems: [
+          "किसी भी अज्ञात WhatsApp लिंक पर क्लिक न करें और न ही .apk फ़ाइल डाउनलोड करें।",
+          "भेजने वाले नंबर को तुरंत WhatsApp और फोन में ब्लॉक करें।",
+          "संदेश को 1909 पर अग्रेषित (Forward) करें या चक्षु पोर्टल पर शिकायत दर्ज करें।",
+          "किसी के साथ भी अपना 6-अंकीय OTP, ATM पिन या UPI पिन कभी साझा न करें।"
+        ]
+      },
+      te: {
+        langName: "తెలుగు",
+        title: "స్కామ్ సావధాన్ (ScamSavdhaan)",
+        badge: "పౌర రక్షణ నమూనా",
+        subtitle: "అనుమానాస్పద SMS, WhatsApp ఆఫర్లు, కరెంట్ బిల్లు మరియు లాటరీ సందేశాల తక్షణ తనిఖీ.",
+        emergencyBanner: "మోసపూరిత కాల్ వచ్చిందా లేదా డబ్బు కోల్పోయారా? వెంటనే 1930 కి కాల్ చేయండి లేదా cybercrime.gov.in లో ఫిర్యాదు చేయండి.",
+        dialBtn: "1930 కి కాల్ చేయండి",
+        reportPortalBtn: "cybercrime.gov.in",
+        tabText: "సందేశం / SMS అతికించండి",
+        tabOcr: "స్క్రీన్‌షాట్ (OCR)",
+        tabSender: "నంబర్ / లింక్ తనిఖీ",
+        placeholderText: "అనుమానాస్పద మెసేజ్ లేదా వాట్సాప్ లింక్‌ను ఇక్కడ పేస్ట్ చేయండి...",
+        pasteBtn: "క్లిప్‌బోర్డ్ నుండి పేస్ట్ చేయండి",
+        clearBtn: "క్లియర్ చేయండి",
+        senderLabel: "పంపినవారి ఐడీ / ఫోన్ నంబర్",
+        senderHelp: "వ్యక్తిగత 10 అంకెల మొబైల్ లేదా ట్రాయ్ ధృవీకరించిన హెడర్.",
+        urlLabel: "అనుమానాస్పద లింక్ లేదా వాట్సాప్ లింక్",
+        urlHelp: "బిట్‌లీ లింక్, .xyz లేదా .apk ఫైళ్లు.",
+        scanBtn: "సందేశాన్ని స్కాన్ చేయండి",
+        scanningText: "లింక్‌లు మరియు స్కామ్ నమూనాలను తనిఖీ చేస్తోంది...",
+        presetsTitle: "డెమో ఉదాహరణలు (వెంటనే పరీక్షించండి)",
+        verdictHigh: "అధిక ప్రమాదం / స్కామ్ హెచ్చరిక",
+        verdictSuspicious: "అనుమానాస్పదం / నిర్ధారించుకోండి",
+        verdictSafe: "సురక్షితమైనది / నిజమైన సందేశం",
+        threatGaugeTitle: "ప్రమాద స్థాయి మీటర్",
+        scamAnatomyTitle: "సందేశ విశ్లేషణ & రెడ్ ఫ్లాగ్‌లు",
+        scamAnatomyHelp: "మోసగాళ్ళు ఈ పద్ధతిని ఎందుకు ఉపయోగిస్తారో తెలుసుకోవడానికి క్లిక్ చేయండి:",
+        aiVerdictTitle: "సులభమైన వివరణ తీర్పు",
+        checklistTitle: "ఇప్పుడు మీరు ఏమి చేయాలి? (భద్రతా చర్యలు)",
+        reportBtn: "చక్షు (Chakshu) ఫిర్యాదు సిద్ధం చేయండి",
+        trendingTitle: "ట్రెండింగ్ స్కామ్‌లు (లైవ్ నవీకరణలు)",
+        trendingSubtitle: "దేశవ్యాప్తంగా నమోదవుతున్న తాజా సైబర్ మోసాలు.",
+        readAloudBtn: "వాయిస్ వినండి",
+        readingAloud: "చదువుతోంది...",
+        stopAudio: "ఆపండి",
+        checkItems: [
+          "లింక్ పై క్లిక్ చేయవద్దు మరియు .apk ఫైల్‌ను డౌన్‌లోడ్ చేయవద్దు.",
+          "పంపినవారి నంబర్‌ను వెంటనే బ్లాక్ చేయండి.",
+          "ఈ SMSను 1909 కి ఫార్వార్డ్ చేయండి లేదా చక్షు పోర్టల్‌లో రిపోర్ట్ చేయండి.",
+          "ఎవరితోనూ మీ OTP లేదా UPI PIN ని పంచుకోవద్దు."
+        ]
+      },
+      ta: {
+        langName: "தமிழ்",
+        title: "ஸ்கேம் சாவ்தான் (ScamSavdhaan)",
+        badge: "குடிமக்கள் பாதுகாப்பு முன்மாதிரி",
+        subtitle: "சந்தேகத்திற்குரிய SMS, WhatsApp சலுகைகள், மின்கட்டண எச்சரிக்கை மற்றும் லாட்டரி செய்திகளை உடனடியாக சரிபார்க்கவும்.",
+        emergencyBanner: "மோசடி அழைப்பு வந்ததா அல்லது பணத்தை இழந்தீர்களா? உடனே 1930-ஐ அழைக்கவும் அல்லது cybercrime.gov.in-ல் புகாரளிக்கவும்.",
+        dialBtn: "1930-ஐ அழைக்கவும்",
+        reportPortalBtn: "cybercrime.gov.in",
+        tabText: "செய்தி / SMS ஒட்டுக",
+        tabOcr: "ஸ்கிரீன்ஷாட் (OCR)",
+        tabSender: "எண் / இணைப்பு சரிபார்",
+        placeholderText: "சந்தேகத்திற்குரிய செய்தியை அல்லது இணைப்பை இங்கே ஒட்டவும்...",
+        pasteBtn: "கிளிப்போர்டிலிருந்து ஒட்டுக",
+        clearBtn: "அழி",
+        senderLabel: "அனுப்புநர் எண் / ஐடி",
+        senderHelp: "தனிப்பட்ட 10 இலக்க மொபைல் எண் அல்லது அதிகாரப்பூர்வ TRAI DLT ஹெடர்.",
+        urlLabel: "சந்தேகத்திற்குரிய இணைப்பு அல்லது WhatsApp இணைப்பு",
+        urlHelp: "bit.ly, .xyz அல்லது பதிவிறக்கம் செய்யப்படும் .apk கோப்பு.",
+        scanBtn: "செய்தியை ஸ்கேன் செய்",
+        scanningText: "இணைப்புகள் மற்றும் மோசடி அறிகுறிகள் ஆராயப்படுகின்றன...",
+        presetsTitle: "டெமோ மாதிரிகள் (உடனே சோதிக்கவும்)",
+        verdictHigh: "அதிக ஆபத்து / மோசடி எச்சரிக்கை",
+        verdictSuspicious: "சந்தேகத்திற்குரியது / கவனம் தேவை",
+        verdictSafe: "பாதுகாப்பானது / அதிகாரப்பூர்வ தகவல்",
+        threatGaugeTitle: "அபாய நிலை அளவீடு",
+        scamAnatomyTitle: "செய்தி பகுப்பாய்வு & மோசடி கூறுகள்",
+        scamAnatomyHelp: "மோசடி கும்பல்கள் ஏன் இந்த முறையைப் பயன்படுத்துகிறார்கள் என்பதை அறிய சொடுக்கவும்:",
+        aiVerdictTitle: "எளிய மொழி முடிவு",
+        checklistTitle: "இப்போது நீங்கள் என்ன செய்ய வேண்டும்?",
+        reportBtn: "சக்ஷு (Chakshu) புகார் படிவம்",
+        trendingTitle: "நடப்பு மோசடிகள் (நேரலை தகவல்)",
+        trendingSubtitle: "தேசிய சைபர்கிரைம் இணையதளத்தில் பதிவாகும் முக்கிய மோசடிகள்.",
+        readAloudBtn: "தமிழில் கேட்க",
+        readingAloud: "படிக்கிறது...",
+        stopAudio: "நிறுத்து",
+        checkItems: [
+          "இணைப்பைக் கிளிக் செய்யாதீர்கள் அல்லது .apk கோப்பை பதிவிறக்காதீர்கள்.",
+          "அனுப்பிய எண்ணை உடனே பிளாக் செய்யவும்.",
+          "இந்த SMS-ஐ 1909-க்கு அனுப்பவும் அல்லது சக்ஷு போர்ட்டலில் புகாரளிக்கவும்.",
+          "உங்கள் OTP அல்லது UPI பின்னை யாரிடமும் பகிராதீர்கள்."
+        ]
+      }
+    };
+
+    // Demo Presets Database
+    const DEMO_PRESETS = [
+      {
+        id: "electricity-cutoff",
+        title: "Electricity Cut-off Alert",
+        badge: "Utility Scam",
+        senderId: "+91-8923456712",
+        suspiciousUrl: "https://wa.me/918923456712?text=Electricity_Bill_Update",
+        message: "Dear Consumer, Your Electricity power will be disconnected tonight at 9:30 PM from State Power Office because your previous month bill was not updated. Please immediately contact our billing officer on WhatsApp https://wa.me/918923456712 or download Bill_Update_KYC.apk to avoid disconnection."
+      },
+      {
+        id: "telegram-whatsapp-job",
+        title: "Telegram Daily Task / Work from Home Job",
+        badge: "Job & Task Scam",
+        senderId: "+91-7011223344",
+        suspiciousUrl: "https://wa.me/917011223344?text=Claim_Joining_Bonus",
+        message: "Congratulations! Your mobile number is selected for Amazon & YouTube Part-Time Work from Home. Earn ₹3000-5000 daily simply by liking Google Maps reviews. Instant ₹150 welcome payout via UPI! Click unknown WhatsApp link https://wa.me/917011223344 or join bit.ly/daily-vip-task immediately."
+      },
+      {
+        id: "india-post-courier",
+        title: "India Post / Courier Address Incomplete",
+        badge: "Phishing Link",
+        senderId: "+91-9456123789",
+        suspiciousUrl: "https://indpost-tracking.xyz/update-address",
+        message: "India Post Notice: Your parcel #IN884920 has arrived at the warehouse but cannot be delivered due to incomplete address. Update your delivery address and pay ₹25 re-delivery fee within 24 hours at https://indpost-tracking.xyz/update-address or your package will be returned immediately."
+      },
+      {
+        id: "whatsapp-unknown-apk",
+        title: "WhatsApp Wedding Invite / RTO Challan APK",
+        badge: "WhatsApp Malware",
+        senderId: "+91-9123498765",
+        suspiciousUrl: "https://chat.whatsapp.com/InviteRTOChallanPay",
+        message: "VAHAN Parivahan Alert: Traffic E-Challan of ₹2,000 issued against your vehicle for overspeeding. Download mParivahan_Challan_View.apk or click https://chat.whatsapp.com/InviteRTOChallanPay immediately to verify photo proof and submit PAN update before court notice is generated."
+      },
+      {
+        id: "safe-bank-otp",
+        title: "Legitimate Bank OTP Alert (Safe sample)",
+        badge: "Genuine Sample",
+        senderId: "VM-HDFCBK",
+        suspiciousUrl: "",
+        message: "648291 is your SECRET One Time Password (OTP) for payment of Rs. 450.00 at IRCTC via NetBanking. Do NOT share this OTP with anyone. Bank employees never ask for OTP, PIN, or CVV. - HDFC Bank"
+      }
+    ];
+
+    // Trending Scams Ticker Data
+    const TRENDING_SCAMS = [
+      {
+        id: "whatsapp-unknown-link",
+        title: "WhatsApp Unknown Link (wa.me) & Wedding/Challan APK Scam",
+        frequency: "4,800+ reports/day",
+        riskLevel: "Critical",
+        channel: "WhatsApp & SMS",
+        sampleMessage: "Check your traffic violation photo in RTO_Challan_2026.apk or message our officer on https://wa.me/9198XXXXXXXX immediately to cancel fine.",
+        howItWorks: "Fraudsters send shortened wa.me links or disguised .apk files (named as Wedding Invites, PM Kisan lists, or RTO Challans). Installing the APK grants complete SMS & OTP reading permissions to steal funds."
+      },
+      {
+        id: "customs-parcel",
+        title: "Fake Customs / Courier Parcel Scam (FedEx / India Post)",
+        frequency: "3,450+ reports/day",
+        riskLevel: "Critical",
+        channel: "IVR Call + SMS Link",
+        sampleMessage: "India Post: Your parcel could not be delivered due to missing house number. Update within 24 hours at indpost-tracking.xyz or parcel returns.",
+        howItWorks: "Uses lookalike domains (.xyz, .top) to harvest credit card numbers and OTPs under the guise of a ₹25 address update fee, or escalates to fake customs seizures."
+      },
+      {
+        id: "digital-arrest",
+        title: "Digital Arrest / Fake Police & CBI Video Call Scam",
+        frequency: "2,900+ reports/day",
+        riskLevel: "Critical",
+        channel: "WhatsApp Video Call",
+        sampleMessage: "URGENT NOTICE: An illegal parcel linked to your Aadhaar/PAN has been intercepted by Mumbai Customs. Join WhatsApp Video verification immediately to avoid arrest warrant.",
+        howItWorks: "Scammers in fake police uniforms keep victims on continuous WhatsApp/Skype video calls ('Digital Arrest') and coerce them into transferring life savings to 'RBI verification accounts'. Police NEVER conduct interrogations on video calls."
+      },
+      {
+        id: "youtube-task",
+        title: "Part-time YouTube Like / WhatsApp VIP Stock Scam",
+        frequency: "3,100+ reports/day",
+        riskLevel: "High",
+        channel: "WhatsApp & Telegram",
+        sampleMessage: "Work from home opportunity! Earn ₹3000-5000 daily by subscribing to YouTube channels. Contact HR on https://wa.me/9170XXXXXXXX for ₹150 test bonus.",
+        howItWorks: "Pays small ₹150–₹300 rewards initially to build trust, then traps victims into 'Prepaid Welfare Tasks' requiring deposits of ₹25,000 to ₹5,00,000 before freezing the dashboard."
+      },
+      {
+        id: "epfo-kyc-apk",
+        title: "EPFO / Bank PAN & KYC Update APK Scam",
+        frequency: "2,150+ reports/day",
+        riskLevel: "High",
+        channel: "SMS & WhatsApp",
+        sampleMessage: "Dear Customer, your SBI YONO account will be blocked today due to pending PAN update. Download YONO_KYC_Update.apk or click bit.ly/sbi-online-kyc immediately.",
+        howItWorks: "Creates artificial panic about bank account suspension to trick citizens into submitting NetBanking credentials or installing screen-sharing apps like AnyDesk."
+      }
+    ];
+
+    // Detection Heuristic Rules
+    const DETECTION_RULES = [
+      {
+        regex: /\b(disconnected tonight at \d{1,2}:\d{2}\s*(?:AM|PM)?|disconnected tonight|disconnected|immediately|within 24 hours|blocked today|suspended today|court notice|arrest warrant|avoid disconnection|last warning|account suspended|deactivated today)\b/gi,
+        category: "urgency",
+        label: "Artificial Panic & Urgency Trigger",
+        explanation: "Scam syndicates manufacture a strict deadline (like 'tonight at 9:30 PM' or 'within 24 hours') so you act in panic without calling the official customer care number or consulting family.",
+        weight: 30
+      },
+      {
+        regex: /(https?:\/\/(?:wa\.me|chat\.whatsapp\.com|api\.whatsapp\.com)\/[^\s]+|(?:wa\.me|chat\.whatsapp\.com)\/[^\s]+|https?:\/\/(?:bit\.ly|tinyurl\.com|is\.gd|t\.me)\/[^\s]+|(?:bit\.ly|tinyurl\.com|is\.gd)\/[^\s]+|https?:\/\/[a-zA-Z0-9-]+\.(?:xyz|top|club|online|site|info)(?:\/[^\s]*)?|[a-zA-Z0-9-]+-(?:kyc|tracking|online|update)\.(?:com|xyz|in)(?:\/[^\s]*)?|\b[A-Za-z0-9_-]+\.apk\b)/gi,
+        category: "link_apk",
+        label: "Suspicious Link / Unknown WhatsApp / Malware APK",
+        explanation: "Banks, electricity boards, and India Post NEVER ask you to click unknown WhatsApp links (wa.me / chat.whatsapp.com), shortened URLs (bit.ly), '.xyz' domains, or install '.apk' files sent via chat.",
+        weight: 45
+      },
+      {
+        regex: /\b(Earn ₹\d+-\d+(?:\s*daily)?|Earn Rs\.?\s*\d+|part-time|lottery|PAN update|Aadhaar update|KYC update|credit card limit increased|pay ₹\d+|share OTP|UPI PIN|welcome payout|bonus payout)\b/gi,
+        category: "financial_kyc",
+        label: "Financial Lure or Sensitive Data Trap",
+        explanation: "Promises of easy daily income ('Earn ₹3000-5000') or requests for PAN/KYC updates and small re-delivery fees ('pay ₹25') are designed to harvest your banking credentials or UPI PIN.",
+        weight: 30
+      }
+    ];
+
+    // Heuristic Analysis Engine
+    function analyzeMessage(rawText, senderInput = "", urlInput = "") {
+      const combinedText = [
+        rawText.trim(),
+        urlInput.trim() && !rawText.includes(urlInput.trim()) ? " " + urlInput.trim() : ""
+      ].join("").trim();
+
+      const isDefensiveOtpWarning = /do not share this otp|never ask for otp|is your secret one time password/i.test(combinedText);
+
+      const spans = [];
+      for (const rule of DETECTION_RULES) {
+        const regex = new RegExp(rule.regex.source, "gi");
+        let match;
+        while ((match = regex.exec(combinedText)) !== null) {
+          const start = match.index;
+          const end = start + match[0].length;
+          const overlaps = spans.some(s => start < s.end && end > s.start);
+          if (!overlaps) {
+            spans.push({
+              start,
+              end,
+              text: match[0],
+              category: rule.category,
+              label: rule.label,
+              explanation: rule.explanation,
+              weight: rule.weight
+            });
+          }
+        }
+      }
+
+      spans.sort((a, b) => a.start - b.start);
+
+      // Build interactive segments
+      const segments = [];
+      let cursor = 0;
+      spans.forEach((span, idx) => {
+        if (span.start > cursor) {
+          segments.push({
+            id: `plain-${idx}`,
+            text: combinedText.slice(cursor, span.start),
+            isHighlight: false
+          });
+        }
+        segments.push({
+          id: `hl-${idx}`,
+          text: span.text,
+          isHighlight: true,
+          category: span.category,
+          label: span.label,
+          explanation: span.explanation
+        });
+        cursor = span.end;
+      });
+
+      if (cursor < combinedText.length) {
+        segments.push({
+          id: `plain-end`,
+          text: combinedText.slice(cursor),
+          isHighlight: false
+        });
+      }
+
+      const redFlagsCount = {
+        urgency: spans.filter(s => s.category === "urgency").length,
+        link_apk: spans.filter(s => s.category === "link_apk").length,
+        financial_kyc: spans.filter(s => s.category === "financial_kyc").length
+      };
+
+      const cleanSender = senderInput.trim();
+      const isPersonalMobile = /^(\+?91[-\s]?)?[6-9]\d{9}$/.test(cleanSender.replace(/\s+/g, "")) || /\b(?:\+91[-\s]?)?[6-9]\d{9}\b/.test(combinedText);
+      const isDltHeader = /^[A-Z]{2}-[A-Z0-9]{5,8}$/i.test(cleanSender);
+
+      let senderCredibility = "Standard or Unspecified Sender";
+      let senderPenalty = 10;
+      if (isPersonalMobile && !isDltHeader) {
+        senderCredibility = "Personal 10-digit mobile number claiming to be an official institution.";
+        senderPenalty = 30;
+      } else if (isDltHeader && redFlagsCount.link_apk === 0) {
+        senderCredibility = `Verified TRAI DLT Commercial Header (${cleanSender.toUpperCase()}).`;
+        senderPenalty = 0;
+      }
+
+      const hasWhatsAppUnknownLink = /wa\.me\/|chat\.whatsapp\.com\/|api\.whatsapp\.com/i.test(combinedText);
+      const hasApk = /\.apk\b/i.test(combinedText);
+      const hasShortenerOrXyz = /bit\.ly|tinyurl|is\.gd|\.xyz|\.top|sbi-online-kyc|indpost-tracking/i.test(combinedText);
+
+      let linkSafetyStatus = "No external suspicious links or APKs found.";
+      if (hasApk && hasWhatsAppUnknownLink) {
+        linkSafetyStatus = "CRITICAL: Contains both an unknown WhatsApp link (wa.me) AND a dangerous .apk malware app file.";
+      } else if (hasApk) {
+        linkSafetyStatus = "CRITICAL: Directs you to install an unverified .apk file that can steal SMS, contacts & OTPs.";
+      } else if (hasWhatsAppUnknownLink) {
+        linkSafetyStatus = "High Risk: Redirects to an unverified WhatsApp chat (wa.me) impersonating official support.";
+      } else if (hasShortenerOrXyz) {
+        linkSafetyStatus = "Suspicious domain (Shortened bit.ly or deceptive .xyz / lookalike phishing domain).";
+      }
+
+      const urgencyScore = isDefensiveOtpWarning
+        ? 5
+        : Math.min(100, redFlagsCount.urgency * 45 + (redFlagsCount.link_apk > 0 ? 25 : 0) + (redFlagsCount.financial_kyc > 0 ? 15 : 0));
+
+      let rawThreat = spans.reduce((acc, s) => acc + s.weight, 0) + senderPenalty;
+      if (isDefensiveOtpWarning && redFlagsCount.link_apk === 0) {
+        rawThreat = 8;
+        if (!cleanSender) senderCredibility = "Standard transactional bank alert format with anti-fraud warning.";
+      }
+
+      const threatScore = Math.max(5, Math.min(99, rawThreat));
+
+      let riskLevel = "SAFE";
+      if (threatScore >= 60) riskLevel = "HIGH_RISK";
+      else if (threatScore >= 30) riskLevel = "SUSPICIOUS";
+
+      let scamCategory = "General Advisory";
+      let aiVerdict = "This message appears to be a standard transactional alert with no phishing links or coercive demands. Still, never share your OTP or UPI PIN with anyone claiming to be from a bank.";
+
+      if (riskLevel === "HIGH_RISK") {
+        if (/wedding/i.test(combinedText) && /\.apk/i.test(combinedText)) {
+          scamCategory = "WhatsApp Wedding Invitation APK Trojan Scam";
+          aiVerdict = "This is a dangerous Android malware attack disguised as a wedding card invitation. Installing the '.apk' file secretly installs a banking trojan that intercepts all incoming OTPs and forwards messages to cyber criminals.";
+        } else if (/electricity|power|bill/i.test(combinedText)) {
+          scamCategory = "Utility Disconnection Scam";
+          aiVerdict = "This is a classic utility disconnection scam designed to make you panic at night. Genuine electricity boards never send disconnection notices from personal 10-digit mobile numbers or ask you to message an unofficial WhatsApp link or download an .apk file.";
+        } else if (/part-time|earn|youtube|telegram|task/i.test(combinedText)) {
+          scamCategory = "WhatsApp / Telegram Prepaid Task Scam";
+          aiVerdict = "This is a deceptive 'Work from Home' task scam that uses unknown WhatsApp links and small initial payouts to win your trust. Fraudsters eventually trap victims into paying thousands of rupees to unlock fake 'VIP task' commissions.";
+        } else if (/india post|parcel|courier|warehouse|address/i.test(combinedText)) {
+          scamCategory = "Fake Courier / India Post Phishing Scam";
+          aiVerdict = "This is a parcel delivery phishing attack using a fake '.xyz' domain to steal your card or UPI credentials. India Post never asks citizens to pay a ₹25 address-update fee on non-government links (official website is indiapost.gov.in).";
+        } else if (/challan|vahan|parivahan|\.apk/i.test(combinedText)) {
+          scamCategory = "WhatsApp Malware (.APK) & Fake Challan Scam";
+          aiVerdict = "This is a dangerous mobile malware attack disguised as a traffic e-Challan or KYC update on WhatsApp. Downloading the '.apk' file or clicking the unknown WhatsApp link gives scammers remote access to read your banking OTPs.";
+        } else if (/yono|sbi|pan card|kyc/i.test(combinedText)) {
+          scamCategory = "Bank Impersonation PAN/KYC Phishing";
+          aiVerdict = "This is an aggressive bank impersonation phishing message claiming your account is blocked. Banks never use deceptive domains like 'sbi-online-kyc.com' or ask for PAN/NetBanking logins through unofficial SMS links.";
+        } else {
+          scamCategory = "High-Risk Phishing & Impersonation Scam";
+          aiVerdict = "This message uses urgent threats and unverified links to trick you into handing over money or personal KYC details. Official institutions never ask you to click shortened links or contact personal WhatsApp numbers.";
+        }
+      } else if (riskLevel === "SUSPICIOUS") {
+        scamCategory = "Unverified Sender / Promotional Lure";
+        aiVerdict = "This message contains pressure tactics or comes from an unverified sender number that requires caution. Verify the claim independently by typing the organization's official website directly into your browser before taking action.";
+      }
+
+      const detectedUrls = spans.filter(s => s.category === "link_apk").map(s => s.text);
+
+      return {
+        riskLevel,
+        threatScore,
+        metrics: {
+          urgencyScore,
+          urgencySummary: urgencyScore >= 60 ? `${urgencyScore}/100 (Artificial panic & deadline detected)` : urgencyScore >= 30 ? `${urgencyScore}/100 (Moderate urgency language)` : `${urgencyScore}/100 (Calm, informational tone)`,
+          linkSafetyStatus,
+          senderCredibility
+        },
+        segments,
+        redFlagsCount,
+        aiVerdict,
+        scamCategory,
+        detectedUrls,
+        senderAnalyzed: cleanSender || "Not specified"
+      };
+    }
+
+    // UI Tab Switching
+    function switchTab(tab) {
+      activeTab = tab;
+      const tabs = ['text', 'ocr', 'sender'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const panel = document.getElementById(`tab-panel-${t}`);
+        if (t === tab) {
+          btn.className = "flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-bold transition-all bg-white text-red-700 shadow-sm border border-slate-200";
+          panel.classList.remove('hidden');
+        } else {
+          btn.className = "flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-slate-900";
+          panel.classList.add('hidden');
+        }
+      });
+    }
+
+    // Live Character Counter
+    function updateCharCount() {
+      const val = document.getElementById('raw-message-input').value;
+      document.getElementById('char-count').innerText = val.length;
+    }
+
+    // Clipboard Paste Helper
+    async function pasteFromClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          document.getElementById('raw-message-input').value = text;
+          updateCharCount();
+          showNotification("Message pasted from clipboard!");
+        }
+      } catch (err) {
+        showNotification("Please press Ctrl+V to paste your text.", true);
+      }
+    }
+
+    function clearInputs() {
+      document.getElementById('raw-message-input').value = "";
+      document.getElementById('sender-input').value = "";
+      document.getElementById('url-input').value = "";
+      updateCharCount();
+      document.getElementById('active-explanation-card').classList.add('hidden');
+    }
+
+    // Load Demo Preset
+    function loadPreset(presetId) {
+      const preset = DEMO_PRESETS.find(p => p.id === presetId);
+      if (!preset) return;
+
+      document.getElementById('raw-message-input').value = preset.message;
+      document.getElementById('sender-input').value = preset.senderId;
+      document.getElementById('url-input').value = preset.suspiciousUrl;
+      updateCharCount();
+
+      // Ensure Text tab is visible
+      switchTab('text');
+      showNotification(`Loaded preset: "${preset.title}"`);
+
+      // Automatically trigger scan
+      executeScan();
+    }
+
+    // Simulated OCR Feature
+    function simulateOcrSample(sampleType) {
+      const ocrScanLine = document.getElementById('ocr-scanner-active');
+      ocrScanLine.classList.remove('hidden');
+
+      setTimeout(() => {
+        ocrScanLine.classList.add('hidden');
+        if (sampleType === 'wedding') {
+          document.getElementById('raw-message-input').value = "Hearty congratulations! You are cordially invited to our daughter's marriage ceremony on Nov 24. Please install Royal_Wedding_Invitation_Card.apk to view wedding venue location and photo albums. In case of issues message on https://wa.me/918844221199 immediately.";
+          document.getElementById('sender-input').value = "+91-8844221199";
+          document.getElementById('url-input').value = "https://wa.me/918844221199";
+        } else {
+          document.getElementById('raw-message-input').value = "Dear SBI Customer, Your YONO NetBanking account has been blocked today due to pending PAN card verification. Please immediately update your PAN card details at https://sbi-online-kyc.com/login to restore account access or visit nearest branch.";
+          document.getElementById('sender-input').value = "+91-9654123890";
+          document.getElementById('url-input').value = "https://sbi-online-kyc.com/login";
+        }
+        updateCharCount();
+        switchTab('text');
+        showNotification("OCR extraction complete! Text extracted from simulated screenshot.");
+        executeScan();
+      }, 700);
+    }
+
+    // Language Selector Toggle
+    function setLanguage(lang) {
+      currentLanguage = lang;
+      const langs = ['en', 'hi', 'te', 'ta'];
+      langs.forEach(l => {
+        const btn = document.getElementById(`lang-btn-${l}`);
+        if (l === lang) {
+          btn.className = "px-2.5 py-1 text-xs sm:text-sm font-bold rounded-lg transition-all bg-white text-red-700 shadow-sm border border-slate-200";
+        } else {
+          btn.className = "px-2.5 py-1 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-700 hover:text-slate-900";
+        }
+      });
+
+      const t = UI_TRANSLATIONS[lang];
+      document.getElementById('emergency-banner-text').innerText = t.emergencyBanner;
+      document.getElementById('emergency-dial-label').innerText = t.dialBtn;
+      document.getElementById('app-brand-title').innerText = t.title;
+      document.getElementById('app-brand-badge').innerText = t.badge;
+      document.getElementById('app-brand-subtitle').innerText = t.subtitle;
+      document.getElementById('tab-label-text').innerText = t.tabText;
+      document.getElementById('tab-label-ocr').innerText = t.tabOcr;
+      document.getElementById('tab-label-sender').innerText = t.tabSender;
+      document.getElementById('raw-message-input').placeholder = t.placeholderText;
+      document.getElementById('paste-btn-text').innerText = t.pasteBtn;
+      document.getElementById('clear-btn-text').innerText = t.clearBtn;
+      document.getElementById('sender-label').innerText = t.senderLabel;
+      document.getElementById('sender-help-text').innerText = t.senderHelp;
+      document.getElementById('url-label').innerText = t.urlLabel;
+      document.getElementById('url-help-text').innerText = t.urlHelp;
+      document.getElementById('scan-btn-label').innerText = t.scanBtn;
+      document.getElementById('scanning-progress-label').innerText = t.scanningText;
+      document.getElementById('presets-title').innerHTML = `⚡ ${t.presetsTitle}`;
+      document.getElementById('ai-verdict-title').innerText = t.aiVerdictTitle;
+      document.getElementById('scam-anatomy-title').innerText = t.scamAnatomyTitle;
+      document.getElementById('scam-anatomy-help').innerText = t.scamAnatomyHelp;
+      document.getElementById('checklist-title').innerText = t.checklistTitle;
+      document.getElementById('report-btn-label').innerText = t.reportBtn;
+      document.getElementById('ticker-heading').innerText = t.trendingTitle;
+      document.getElementById('ticker-subheading').innerText = t.trendingSubtitle;
+
+      // Re-render checklist with localized text
+      renderChecklist();
+
+      // If we have an existing scan, update verdict banner text
+      if (lastScanResult) {
+        updateVerdictDisplay(lastScanResult);
+      }
+    }
+
+    // Execute Scan with 1.5-second Skeleton Loader
+    function executeScan() {
+      if (isScanning) return;
+
+      const rawText = document.getElementById('raw-message-input').value;
+      const senderInput = document.getElementById('sender-input').value;
+      const urlInput = document.getElementById('url-input').value;
+
+      if (!rawText.trim() && !urlInput.trim()) {
+        showNotification("Please enter or paste a message, screenshot, or URL to scan.", true);
+        return;
+      }
+
+      isScanning = true;
+      document.getElementById('scan-icon-shield').classList.add('hidden');
+      document.getElementById('scan-icon-spinner').classList.remove('hidden');
+      document.getElementById('primary-scan-btn').classList.add('opacity-90', 'cursor-wait');
+
+      // Show skeleton, hide results
+      const resultsCont = document.getElementById('results-container');
+      const skeleton = document.getElementById('skeleton-loader');
+      resultsCont.classList.add('hidden');
+      skeleton.classList.remove('hidden');
+
+      // Stop speech if speaking
+      if (window.speechSynthesis && window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        isSpeaking = false;
+        updateAudioButtonUI();
+      }
+
+      setTimeout(() => {
+        const result = analyzeMessage(rawText, senderInput, urlInput);
+        lastScanResult = result;
+
+        // Hide skeleton, show results
+        skeleton.classList.add('hidden');
+        resultsCont.classList.remove('hidden');
+
+        document.getElementById('scan-icon-shield').classList.remove('hidden');
+        document.getElementById('scan-icon-spinner').classList.add('hidden');
+        document.getElementById('primary-scan-btn').classList.remove('opacity-90', 'cursor-wait');
+        isScanning = false;
+
+        // Render result data
+        updateVerdictDisplay(result);
+        renderDissection(result.segments);
+        renderRedFlagCounts(result.redFlagsCount);
+
+        // Reset checklist completed states
+        checkedItemsState = [false, false, false, false];
+        renderChecklist();
+
+        // Scroll to results on mobile
+        if (window.innerWidth < 1024) {
+          resultsCont.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 1500);
+    }
+
+    // Update Verdict Banner & Meter
+    function updateVerdictDisplay(result) {
+      const t = UI_TRANSLATIONS[currentLanguage];
+      const verdictCard = document.getElementById('verdict-card');
+      const iconCont = document.getElementById('verdict-icon-container');
+      const verdictTitle = document.getElementById('verdict-title');
+      const verdictCategory = document.getElementById('verdict-category');
+      const gaugeCircle = document.getElementById('gauge-circle-progress');
+      const scoreNumber = document.getElementById('threat-score-number');
+
+      scoreNumber.innerText = result.threatScore;
+      gaugeCircle.setAttribute('stroke-dasharray', `${result.threatScore}, 100`);
+
+      verdictCategory.innerText = result.scamCategory;
+      document.getElementById('ai-verdict-text').innerText = result.aiVerdict;
+      document.getElementById('metric-urgency-val').innerText = result.metrics.urgencySummary;
+      document.getElementById('metric-link-val').innerText = result.metrics.linkSafetyStatus;
+      document.getElementById('metric-sender-val').innerText = result.metrics.senderCredibility;
+
+      if (result.riskLevel === "HIGH_RISK") {
+        verdictTitle.innerText = t.verdictHigh;
+        verdictTitle.className = "text-xl font-black text-red-950";
+        verdictCard.className = "rounded-2xl p-5 shadow-sm border transition-all bg-red-50 border-red-200";
+        iconCont.className = "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm bg-red-600 text-white pulse-danger";
+        gaugeCircle.setAttribute('class', 'text-red-600 transition-all duration-1000');
+        scoreNumber.className = "text-2xl font-black text-red-700";
+      } else if (result.riskLevel === "SUSPICIOUS") {
+        verdictTitle.innerText = t.verdictSuspicious;
+        verdictTitle.className = "text-xl font-black text-amber-950";
+        verdictCard.className = "rounded-2xl p-5 shadow-sm border transition-all bg-amber-50 border-amber-200";
+        iconCont.className = "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm bg-amber-500 text-white";
+        gaugeCircle.setAttribute('class', 'text-amber-500 transition-all duration-1000');
+        scoreNumber.className = "text-2xl font-black text-amber-700";
+      } else {
+        verdictTitle.innerText = t.verdictSafe;
+        verdictTitle.className = "text-xl font-black text-emerald-950";
+        verdictCard.className = "rounded-2xl p-5 shadow-sm border transition-all bg-emerald-50 border-emerald-200";
+        iconCont.className = "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm bg-emerald-600 text-white";
+        gaugeCircle.setAttribute('class', 'text-emerald-600 transition-all duration-1000');
+        scoreNumber.className = "text-2xl font-black text-emerald-700";
+      }
+    }
+
+    // Render Dissection Box
+    function renderDissection(segments) {
+      const box = document.getElementById('dissection-box');
+      box.innerHTML = "";
+
+      segments.forEach(seg => {
+        if (!seg.isHighlight) {
+          const textNode = document.createTextNode(seg.text);
+          box.appendChild(textNode);
+        } else {
+          const span = document.createElement('span');
+          span.innerText = seg.text;
+          span.dataset.label = seg.label;
+          span.dataset.explanation = seg.explanation;
+
+          let colorClasses = "bg-yellow-200 text-yellow-950 border-b-2 border-yellow-500 hover:bg-yellow-300";
+          if (seg.category === "urgency") {
+            colorClasses = "bg-red-200 text-red-950 border-b-2 border-red-600 font-bold hover:bg-red-300";
+          } else if (seg.category === "link_apk") {
+            colorClasses = "bg-amber-200 text-amber-950 border-b-2 border-amber-600 font-bold hover:bg-amber-300";
+          }
+
+          span.className = `cursor-pointer px-1 py-0.5 rounded mx-0.5 transition-colors ${colorClasses}`;
+          span.onclick = () => showExplanation(seg.label, seg.explanation);
+          box.appendChild(span);
+        }
+      });
+    }
+
+    function showExplanation(label, explanation) {
+      const card = document.getElementById('active-explanation-card');
+      const labelEl = document.getElementById('expl-label');
+      const textEl = document.getElementById('expl-text');
+
+      labelEl.innerText = `🔍 ${label}`;
+      textEl.innerText = explanation;
+      card.classList.remove('hidden');
+    }
+
+    function renderRedFlagCounts(counts) {
+      document.getElementById('badge-urgency-count').innerText = `🚨 Urgency Triggers: ${counts.urgency}`;
+      document.getElementById('badge-link-count').innerText = `🔗 Suspicious Link/APK: ${counts.link_apk}`;
+      document.getElementById('badge-financial-count').innerText = `💰 Financial Lure: ${counts.financial_kyc}`;
+    }
+
+    // Render Checklist with dynamic language
+    function renderChecklist() {
+      const container = document.getElementById('checklist-items-container');
+      const t = UI_TRANSLATIONS[currentLanguage];
+      container.innerHTML = "";
+
+      let completedCount = 0;
+      t.checkItems.forEach((itemText, idx) => {
+        const isChecked = checkedItemsState[idx];
+        if (isChecked) completedCount++;
+
+        const row = document.createElement('div');
+        row.className = `flex items-start gap-3 p-2.5 rounded-xl border transition-all cursor-pointer ${
+          isChecked ? "bg-emerald-50/70 border-emerald-300 text-emerald-950" : "bg-slate-50 border-slate-200 text-slate-800 hover:bg-slate-100"
+        }`;
+        row.onclick = () => toggleCheckItem(idx);
+
+        row.innerHTML = `
+          <div class="w-5 h-5 rounded flex items-center justify-center mt-0.5 flex-shrink-0 transition-colors ${
+            isChecked ? "bg-emerald-600 text-white" : "border-2 border-slate-400 bg-white"
+          }">
+            ${isChecked ? '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>' : ''}
+          </div>
+          <span class="flex-1 text-xs sm:text-sm font-medium ${isChecked ? 'line-through text-slate-500' : ''}">${itemText}</span>
+        `;
+        container.appendChild(row);
+      });
+
+      document.getElementById('checklist-progress').innerText = `${completedCount}/4 Completed`;
+    }
+
+    function toggleCheckItem(idx) {
+      checkedItemsState[idx] = !checkedItemsState[idx];
+      renderChecklist();
+    }
+
+    // Audio Read Aloud (Senior Accessibility via Web Speech API)
+    function toggleSpeechVerdict() {
+      if (!window.speechSynthesis) {
+        showNotification("Speech synthesis is not supported on this browser.", true);
+        return;
+      }
+
+      if (isSpeaking) {
+        window.speechSynthesis.cancel();
+        isSpeaking = false;
+        updateAudioButtonUI();
+        return;
+      }
+
+      if (!lastScanResult) return;
+
+      const verdictSpeechText = `${lastScanResult.riskLevel === 'HIGH_RISK' ? 'Alert: High Risk Scam Detected.' : 'Notice: Message Analyzed.'} ${lastScanResult.aiVerdict}`;
+      const utterance = new SpeechSynthesisUtterance(verdictSpeechText);
+      utterance.rate = 0.95; // Slightly slower for senior citizens
+
+      // Set voice language
+      if (currentLanguage === "hi") utterance.lang = "hi-IN";
+      else if (currentLanguage === "te") utterance.lang = "te-IN";
+      else if (currentLanguage === "ta") utterance.lang = "ta-IN";
+      else utterance.lang = "en-IN";
+
+      utterance.onend = () => {
+        isSpeaking = false;
+        updateAudioButtonUI();
+      };
+      utterance.onerror = () => {
+        isSpeaking = false;
+        updateAudioButtonUI();
+      };
+
+      window.speechSynthesis.speak(utterance);
+      isSpeaking = true;
+      updateAudioButtonUI();
+    }
+
+    function updateAudioButtonUI() {
+      const btnLabel = document.getElementById('audio-btn-label');
+      const icon = document.getElementById('audio-icon-speaker');
+      const t = UI_TRANSLATIONS[currentLanguage];
+
+      if (isSpeaking) {
+        btnLabel.innerText = t.stopAudio;
+        icon.classList.add('text-red-700', 'animate-pulse');
+      } else {
+        btnLabel.innerText = t.readAloudBtn;
+        icon.classList.remove('text-red-700', 'animate-pulse');
+      }
+    }
+
+    // Render Trending Scams Ticker
+    function renderTrendingScams() {
+      const grid = document.getElementById('trending-scams-grid');
+      grid.innerHTML = "";
+
+      TRENDING_SCAMS.forEach(item => {
+        const card = document.createElement('div');
+        card.className = "bg-slate-50 hover:bg-white rounded-xl p-4 border border-slate-200 hover:border-red-300 hover:shadow-md transition-all flex flex-col justify-between space-y-3";
+
+        let riskBadge = "bg-red-100 text-red-800 border-red-200";
+        if (item.riskLevel === "High") riskBadge = "bg-amber-100 text-amber-800 border-amber-200";
+
+        card.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded-full border ${riskBadge}">
+                ${item.riskLevel} Risk
+              </span>
+              <span class="text-[11px] font-semibold text-slate-500">${item.frequency}</span>
+            </div>
+            <h4 class="text-sm font-bold text-slate-900 leading-snug">${item.title}</h4>
+            <div class="text-[11px] font-semibold text-slate-500">Channel: <span class="text-slate-700">${item.channel}</span></div>
+            <div class="bg-white p-2.5 rounded-lg border border-slate-200 text-xs font-mono text-slate-700 italic">
+              "${item.sampleMessage}"
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">${item.howItWorks}</p>
+          </div>
+          <button
+            type="button"
+            onclick="loadCustomSample('${encodeURIComponent(item.sampleMessage)}')"
+            class="text-xs font-bold text-red-700 hover:text-red-800 flex items-center gap-1 mt-2 pt-2 border-t border-slate-200/80 active:scale-95"
+          >
+            <span>Scan this pattern</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+          </button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function loadCustomSample(encodedMsg) {
+      const msg = decodeURIComponent(encodedMsg);
+      document.getElementById('raw-message-input').value = msg;
+      updateCharCount();
+      switchTab('text');
+      showNotification("Sample loaded into scanner!");
+      executeScan();
+    }
+
+    // Chakshu Modal & Report Text Generator
+    function generateChakshuComplaintText(result, sender, rawText) {
+      const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+      return `=== INCIDENT REPORT FOR CHAKSHU / 1930 HELPLINE ===\nReport Date & Time: ${timestamp} IST\nPortal Reference: Department of Telecommunications (DoT) Chakshu / Sanchar Saathi\nCategory of Fraud: ${result.scamCategory}\nAssessed Risk Level: ${result.riskLevel} (Threat Score: ${result.threatScore}/100)\n\nSUSPECT DETAILS:\n- Sender / Header: ${sender || result.senderAnalyzed || "Unknown / Not Provided"}\n- Detected Phishing / WhatsApp URLs: ${result.detectedUrls.join(", ") || "None"}\n\nMESSAGE CONTENT:\n"${rawText.trim()}"\n\nAI SCANNER RED FLAGS IDENTIFIED:\n1. Urgency Pressure Score: ${result.metrics.urgencyScore}/100\n2. Link & Malware Safety: ${result.metrics.linkSafetyStatus}\n3. Sender Evaluation: ${result.metrics.senderCredibility}\n\nINCIDENT SUMMARY:\n${result.aiVerdict}\n\nREQUESTED ACTION:\nImmediate blocking of sender number/IMEI on telecom network and blacklisting of deceptive URL/APK servers.\n===================================================`;
+    }
+
+    function openChakshuModal() {
+      if (!lastScanResult) {
+        showNotification("Please scan a message first to generate the report.", true);
+        return;
+      }
+      const rawText = document.getElementById('raw-message-input').value;
+      const sender = document.getElementById('sender-input').value;
+      const complaintText = generateChakshuComplaintText(lastScanResult, sender, rawText);
+
+      document.getElementById('chakshu-complaint-textarea').value = complaintText;
+      document.getElementById('chakshu-modal').classList.remove('hidden');
+    }
+
+    function closeChakshuModal() {
+      document.getElementById('chakshu-modal').classList.add('hidden');
+    }
+
+    async function copyComplaintToClipboard() {
+      const text = document.getElementById('chakshu-complaint-textarea').value;
+      const label = document.getElementById('copy-complaint-label');
+      try {
+        await navigator.clipboard.writeText(text);
+        label.innerText = "Copied to Clipboard!";
+        setTimeout(() => {
+          label.innerText = "Copy Complaint Text";
+        }, 2000);
+      } catch (err) {
+        // Fallback
+        document.getElementById('chakshu-complaint-textarea').select();
+        document.execCommand('copy');
+        label.innerText = "Copied to Clipboard!";
+        setTimeout(() => {
+          label.innerText = "Copy Complaint Text";
+        }, 2000);
+      }
+    }
+
+    // Toast Notification Banner
+    function showNotification(msg, isError = false) {
+      let toast = document.getElementById('app-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'app-toast';
+        toast.className = 'fixed bottom-5 right-5 z-50 px-4 py-2.5 rounded-xl shadow-lg text-sm font-bold text-white transition-all transform translate-y-2 opacity-0';
+        document.body.appendChild(toast);
+      }
+
+      toast.innerText = msg;
+      toast.className = `fixed bottom-5 right-5 z-50 px-4 py-2.5 rounded-xl shadow-lg text-sm font-bold text-white transition-all transform translate-y-0 opacity-100 ${
+        isError ? "bg-red-600" : "bg-slate-900"
+      }`;
+
+      setTimeout(() => {
+        toast.className = 'fixed bottom-5 right-5 z-50 px-4 py-2.5 rounded-xl shadow-lg text-sm font-bold text-white transition-all transform translate-y-2 opacity-0 pointer-events-none';
+      }, 2500);
+    }
+
+    // Initial page setup on load
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTrendingScams();
+      renderChecklist();
+      // Auto-load preset 1 for instant out-of-the-box experience
+      loadPreset('electricity-cutoff');
+    });
+  </script>
+</body>
+</html>
+
